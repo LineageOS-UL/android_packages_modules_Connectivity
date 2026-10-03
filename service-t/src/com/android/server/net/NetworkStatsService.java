@@ -434,6 +434,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
      */
     private SparseIntArray mActiveUidCounterSet = new SparseIntArray();
     private IBpfMap<S32, U8> mUidCounterSetMap = null;
+    private boolean mLoggedNullCounterSetMap = false;
     private IBpfMap<CookieTagMapKey, CookieTagMapValue> mCookieTagMap = null;
     private IBpfMap<StatsMapKey, StatsMapValue> mStatsMapA = null;
     private IBpfMap<StatsMapKey, StatsMapValue> mStatsMapB = null;
@@ -1842,7 +1843,10 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     private void setKernelCounterSet(int uid, int set) {
         if (mUidCounterSetMap == null) {
-            Log.wtf(TAG, "Fail to set UidCounterSet: Null bpf map");
+            if (!mLoggedNullCounterSetMap) {
+                Log.e(TAG, "Fail to set UidCounterSet: Null bpf map (no eBPF? further errors suppressed)");
+                mLoggedNullCounterSetMap = true;
+            }
             return;
         }
 
